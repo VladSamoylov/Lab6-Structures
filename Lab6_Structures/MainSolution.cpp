@@ -8,6 +8,9 @@
 #include "iomanip"
 #include "cctype"
 
+#define ANSI_COLOR_BLUE "\033[34m"
+#define ANSI_COLOR_RESET "\033[0m"
+
 using namespace std;
 
 time_t t = time(0);
@@ -76,6 +79,10 @@ void GetTotalCostPrevYear(Sales*, int*);
 void GetAmountProductForUserYear(Sales*, int*);
 void IfSales(Sales*, int*);
 
+// Function for the Lab 7 sort algorihms
+void BubbleSort(Sales*, int*);
+void GetSalesInfo(Sales*, int*);
+
 /**
  * @brief Перевіряє коректне значення типу int, яке ввів користувач до системи
  * @param i Значення типу int введене з клавіатури
@@ -100,7 +107,7 @@ int CheckIntValue(int* i) {
 
 /**
  * @brief Перевіряє мінімальну кількість замовлень
- * @param n Кількість замовлень введенна користувачем з клавіатури
+ * @param n Кількість замовлень введена користувачем з клавіатури
  * @return Повертає коректне значення кількості елементів замовлень
 */
 int CheckMinMembersOfOrder(int* n) {
@@ -344,7 +351,7 @@ void FillStructures(int* n, map<string, list<string>>& lib, list<string>& surnam
 }
 
 /**
- * @brief нтерфейс який дає змогу користувачу працювати з додатком
+ * @brief Інтерфейс який дає змогу користувачу працювати з додатком
  * @param q Вибір виконуваного завдання, яке задається користувачем з клавіатури
 */
 void MenuOfSolution(int* q) {
@@ -382,6 +389,8 @@ void MenuOfSolution(int* q) {
 		GetTotalCostPrevYear(inform_mas, &n);
 		GetAmountProductForUserYear(inform_mas, &n);
 		IfSales(inform_mas, &n);
+		BubbleSort(inform_mas, &n);
+		GetSalesInfo(inform_mas, &n);
 		delete[] inform_mas;
 		break;
 	default:
@@ -406,6 +415,107 @@ int main() {
 	MenuOfSolution(&q);	
 
 	return main();
+}
+
+/**
+ * @brief Структура, що використовується як буфер при сортуванні інформаційного масиву структури продажу товару
+*/
+struct SalesSortBuf {
+	string product_name_buf;
+	int amount_buf;
+	float unit_cost_buf;
+	chrono::year_month_day sales_date_buf;
+};
+
+/**
+ * @brief Сортує інформаційний масив продажів за датою продажу, використовуючи алгоритм сортування обміном
+ * @param inform_mas Інформаційний масив структури продажу товару
+ * @param n Кількість фіскальних звітних чеків
+*/
+void BubbleSort(Sales* inform_mas, int* n) {
+	SalesSortBuf buffer;
+	int length = *n;
+
+	cout << "\n____________________________________\n";
+	cout << "Bubble Sorting is in progress..." << endl;
+	while (length != 0) {
+		int max_index = 0;
+		for (int j = 0; j < length - 1; j++) {
+			if (inform_mas[j].sales_date > inform_mas[j + 1].sales_date) {
+				buffer.product_name_buf = inform_mas[j].product_name;
+				buffer.amount_buf = inform_mas[j].amount;
+				buffer.unit_cost_buf = inform_mas[j].unit_cost;
+				buffer.sales_date_buf = inform_mas[j].sales_date;
+				
+				inform_mas[j].product_name = inform_mas[j + 1].product_name;
+				inform_mas[j].amount = inform_mas[j + 1].amount;
+				inform_mas[j].unit_cost = inform_mas[j + 1].unit_cost;
+				inform_mas[j].sales_date = inform_mas[j + 1].sales_date;
+
+				inform_mas[j + 1].product_name = buffer.product_name_buf;
+				inform_mas[j + 1].amount = buffer.amount_buf;
+				inform_mas[j + 1].unit_cost = buffer.unit_cost_buf;
+				inform_mas[j + 1].sales_date = buffer.sales_date_buf;
+				max_index = j + 1;
+			}
+			else if ((inform_mas[j].sales_date == inform_mas[j + 1].sales_date)) {
+				if (inform_mas[j].amount > inform_mas[j + 1].amount) {
+					buffer.product_name_buf = inform_mas[j].product_name;
+					buffer.amount_buf = inform_mas[j].amount;
+					buffer.unit_cost_buf = inform_mas[j].unit_cost;
+					buffer.sales_date_buf = inform_mas[j].sales_date;
+
+					inform_mas[j].product_name = inform_mas[j + 1].product_name;
+					inform_mas[j].amount = inform_mas[j + 1].amount;
+					inform_mas[j].unit_cost = inform_mas[j + 1].unit_cost;
+					inform_mas[j].sales_date = inform_mas[j + 1].sales_date;
+
+					inform_mas[j + 1].product_name = buffer.product_name_buf;
+					inform_mas[j + 1].amount = buffer.amount_buf;
+					inform_mas[j + 1].unit_cost = buffer.unit_cost_buf;
+					inform_mas[j + 1].sales_date = buffer.sales_date_buf;	
+					max_index = j + 1;
+				}
+			}
+		}
+		length = max_index;
+	}
+}
+
+/**
+ * @brief Відображує інформацію, яку містить в собі інформаційний масив структури продажу товару
+ * @param inform_mas Інформаційний масив структури продажу товару
+ * @param n Кількість фіскальних звітних чеків
+*/
+void GetSalesInfo(Sales* inform_mas, int* n) {
+	int count = 0;
+	int n_count = 0;
+
+	for (int i = 0; i < *n; i++) {
+		bool once = true;
+		for (int j = 0; j < *n; j++) {
+			if ((inform_mas + i + j)->sales_date == (inform_mas + i + j + 1)->sales_date) {
+				if (once) {
+					cout << setw(25) << inform_mas[i + j].product_name << " | " << setw(4) << inform_mas[i + j].amount << " | " << setw(8) << fixed << setprecision(2) << inform_mas[i + j].unit_cost << "$ | " << ANSI_COLOR_BLUE << inform_mas[i + j].sales_date << ANSI_COLOR_RESET << endl;
+					cout << setw(25) << inform_mas[i + j + 1].product_name << " | " << setw(4) << inform_mas[i + j + 1].amount << " | " << setw(8) << fixed << setprecision(2) << inform_mas[i + j + 1].unit_cost << "$ | " << ANSI_COLOR_BLUE << inform_mas[i + j + 1].sales_date << ANSI_COLOR_RESET << endl;
+					once = false;
+					n_count++;
+				}
+				else {
+					cout << setw(25) << inform_mas[i + j + 1].product_name << " | " << setw(4) << inform_mas[i + j + 1].amount << " | " << setw(8) << fixed << setprecision(2) << inform_mas[i + j + 1].unit_cost << "$ | " << ANSI_COLOR_BLUE << inform_mas[i + j + 1].sales_date << ANSI_COLOR_RESET << endl;
+					n_count++;
+				}
+				count++;
+			}
+			else {
+				if (once) (inform_mas + i)->GetInfo(); n_count++;
+				break;
+			}			
+		}
+		i += count;
+		count = 0;
+	}
+	cout << n_count << endl;
 }
 
 /**
@@ -465,6 +575,7 @@ void FillStrucruresRandom(Sales* inform_mas, int* n, map<string, list<string>>& 
 	for (int i = 2; i < *n; i++) {
 		it = next(catalog.begin(), GetRandomNumber(catalog.size()));
 		inform_mas[i].product_name = it->first;
+		//(inform_mas + i)->product_name;
 		inform_mas[i].amount = GetRandomNumber(10) + 1;
 		inform_mas[i].unit_cost = (float)GetRandomNumber(500) + (float)GetRandomNumber(100) / 10 + (float)GetRandomNumber(100) / 100;
 		rnd_date = GetRandomData(year_base = 2000, date_now = now.tm_year - 100);
