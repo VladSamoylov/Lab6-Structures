@@ -455,7 +455,7 @@ void BubbleSort(Sales* inform_mas, int* n) {
 				inform_mas[j + 1].product_name = buffer.product_name_buf;
 				inform_mas[j + 1].amount = buffer.amount_buf;
 				inform_mas[j + 1].unit_cost = buffer.unit_cost_buf;
-				inform_mas[j + 1].sales_date = buffer.sales_date_buf;
+				inform_mas[j + 1].sales_date = buffer.sales_date_buf;				
 				max_index = j + 1;
 			}
 			else if ((inform_mas[j].sales_date == inform_mas[j + 1].sales_date)) {
